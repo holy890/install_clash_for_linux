@@ -1,1 +1,102 @@
-git keep
+#!/bin/bash
+
+# 下载clash
+download_and_unzip() {
+  local file=$1
+  local url=$2
+
+  wget -O $file $url
+  gzip -d $file
+
+  mv ${file%.gz} clash
+  chmod +x clash
+
+  sudo mv clash /usr/local/bin
+
+  rm -f $file
+}
+
+# 创建目录
+check_and_create_dir() {
+  local dir=$1
+
+  if [ ! -d $dir ]; then
+    mkdir -p $dir
+  fi
+}
+
+# 检查系统
+check_arch_and_download_clash() {
+  local arch=$(uname -m)
+
+  case $arch in
+    x86_64)
+      download_and_unzip clash-linux-amd64-v1.15.1.gz "https://qinzhi.top/d/%E7%94%B5%E8%84%91/clash/clash-linux-amd64-v1.15.1.gz?sign=hkpaoMwIa2V6Fcu8U1RMwYiI9qamubb_5DL7UZJXEwk=:1684002131"
+      ;;
+    i686)
+      download_and_unzip clash-linux-386-v1.15.1.gz "https://qinzhi.top/d/%E7%94%B5%E8%84%91/clash/clash-linux-386-v1.15.1.gz?sign=xLSNT3iKPa7L0Rj8WyZNkdvhuKKzW-Fjm1JU7TQCcPw=:1684002139"
+      ;;
+    armv7l)
+      download_and_unzip clash-linux-armv7-v1.15.1.gz "https://qinzhi.top/d/%E7%94%B5%E8%84%91/clash/clash-linux-armv7-v1.15.1.gz?sign=snRbVIzskVq3w2hrPZv3aueWnFUKjYkDeNf9qF87XHg=:1684002101"
+      ;;
+    aarch64)
+      download_and_unzip clash-linux-arm64-v1.15.1.gz "https://qinzhi.top/d/%E7%94%B5%E8%84%91/clash/clash-linux-arm64-v1.15.1.gz?sign=ZCKQtIIAQhHyTCSkiIosqOJu_cZ7nosGT6QUP7qme8A=:1684002120"
+      ;;
+    *)
+      echo "不支持的系统构架: $arch"
+      exit 1
+      ;;
+  esac
+}
+
+# 下载订阅
+download_subscription() {
+  local url=$1
+
+  wget -O config.yml $url&flag=clash
+}
+
+# 设置环境变量
+set_env_vars() {
+  echo 'export http_proxy=http://127.0.0.1:7890' >> ~/.bashrc
+  echo 'export https_proxy=http://127.0.0.1:7890' >> ~/.bashrc
+
+  source ~/.bashrc
+  export | grep -i proxy
+}
+
+# 下载mmdb
+download_and_move_mmdb() {
+  wget https://github.com/Dreamacro/maxmind-geoip/releases/download/20230512/Country.mmdb
+  mv Country.mmdb ~/.config/clash/
+}
+
+# 注册clash命令
+register_clash_command() {
+  echo 'alias clash="nohup /usr/local/bin/clash > /dev/null 2>&1 &"' >> ~/.bashrc
+  source ~/.bashrc
+}
+
+main() {
+  check_and_create_dir ~/Downloads
+  cd ~/Downloads
+
+  check_arch_and_download_clash
+
+  clash -v
+
+  echo -e "\033[33m请输入你的订阅地址:\033[0m"
+  read subscription_url
+
+  download_subscription $subscription_url
+
+  check_and_create_dir ~/.config/clash
+
+  mv config.yml ~/.config/clash/
+
+  download_and_move_mmdb
+
+  set_env_vars
+  register_clash_command
+}
+main
