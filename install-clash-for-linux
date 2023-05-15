@@ -1,17 +1,22 @@
 #!/bin/bash
 
+set -e
+
 # 下载clash
 download_and_unzip() {
   local file=$1
   local url=$2
 
-  wget -O $file $url
-  gzip -d $file
+  echo "正在从 $url 下载 Clash"
+  wget -O $file $url || { echo "下载文件失败: $url"; exit 1; }
+  
+  echo "正在解压文件: $file"
+  gzip -d $file || { echo "解压文件失败: $file"; exit 1; }
 
   mv ${file%.gz} clash
   chmod +x clash
 
-  sudo mv clash /usr/local/bin
+  sudo mv clash /usr/local/bin || { echo "移动文件到 /usr/local/bin 失败"; exit 1; }
 
   rm -f $file
 }
@@ -21,7 +26,7 @@ check_and_create_dir() {
   local dir=$1
 
   if [ ! -d $dir ]; then
-    mkdir -p $dir
+    mkdir -p $dir || { echo "创建目录失败: $dir"; exit 1; }
   fi
 }
 
@@ -31,19 +36,16 @@ check_arch_and_download_clash() {
 
   case $arch in
     x86_64)
-      download_and_unzip clash-linux-amd64-v1.15.1.gz "http://runfu61ah.hn-bkt.clouddn.com/clash-linux-amd64-v1.15.1.gz
-"
+      download_and_unzip clash-linux-amd64-v1.15.1.gz "http://runfu61ah.hn-bkt.clouddn.com/clash-linux-amd64-v1.15.1.gz"
       ;;
     i686)
-      download_and_unzip clash-linux-386-v1.15.1.gz "http://runfu61ah.hn-bkt.clouddn.com/clash-linux-386-v1.15.1.gz
-"
+      download_and_unzip clash-linux-386-v1.15.1.gz "http://runfu61ah.hn-bkt.clouddn.com/clash-linux-386-v1.15.1.gz"
       ;;
     armv7l)
       download_and_unzip clash-linux-armv7-v1.15.1.gz "http://runfu61ah.hn-bkt.clouddn.com/clash-linux-armv7-v1.15.1.gz"
       ;;
     aarch64)
-      download_and_unzip clash-linux-arm64-v1.15.1.gz "http://runfu61ah.hn-bkt.clouddn.com/clash-linux-arm64-v1.15.1.gz
-"
+      download_and_unzip clash-linux-arm64-v1.15.1.gz "http://runfu61ah.hn-bkt.clouddn.com/clash-linux-arm64-v1.15.1.gz"
       ;;
     *)
       echo "不支持的系统构架: $arch"
@@ -54,10 +56,11 @@ check_arch_and_download_clash() {
 
 # 下载订阅
 download_subscription() {
-  local url=$1
+  local url=$1"&flag=clash"
 
-  wget -O config.yml $url&flag=clash
+  wget -O config.yaml "$url" || { echo "下载订阅失败: $url"; exit 1; }
 }
+
 
 # 设置环境变量
 set_env_vars() {
@@ -70,14 +73,14 @@ set_env_vars() {
 
 # 下载mmdb
 download_and_move_mmdb() {
-  wget http://runfu61ah.hn-bkt.clouddn.com/Country.mmdb
-  mv Country.mmdb ~/.config/clash/
+  wget http://runfu61ah.hn-bkt.clouddn.com/Country.mmdb || { echo "下载mmdb失败"; exit 1; }
+  mv Country.mmdb ~/.config/clash/ || { echo "移动mmdb文件失败"; exit 1; }
 }
 
 # 注册clash命令
 register_clash_command() {
   echo 'alias clash="nohup /usr/local/bin/clash > /dev/null 2>&1 &"' >> ~/.bashrc
-  source ~/.bashrc
+  source ~/.bashrc || { echo "更新 ~/.bashrc 文件失败"; exit 1; }
 }
 
 main() {
@@ -86,16 +89,22 @@ main() {
 
   check_arch_and_download_clash
 
-  clash -v
+  clash -v || { echo "Clash 没有成功安装"; exit 1; }
 
-  echo -e "\033[33m请输入你的订阅地址:\033[0m"
-  read subscription_url
+  subscription_url=$(whiptail --inputbox "请输入你的订阅地址:" 8 78 --title "订阅地址输入" 3>&1 1>&2 2>&3)
+
+  exitstatus=$?
+  if [ $exitstatus = 0 ]; then
+    echo "你输入的订阅地址是: $subscription_url"
+  else
+      echo "你选择了取消."
+  fi
 
   download_subscription $subscription_url
 
   check_and_create_dir ~/.config/clash
 
-  mv config.yml ~/.config/clash/
+  mv config.yaml ~/.config/clash/ || { echo "移动配置文件失败"; exit 1; }
 
   download_and_move_mmdb
 
