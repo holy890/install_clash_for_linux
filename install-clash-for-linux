@@ -31,16 +31,19 @@ check_arch_and_download_clash() {
 
   case $arch in
     x86_64)
-      download_and_unzip clash-linux-amd64-v1.15.1.gz "https://qinzhi.top/d/%E7%94%B5%E8%84%91/clash/clash-linux-amd64-v1.15.1.gz?sign=hkpaoMwIa2V6Fcu8U1RMwYiI9qamubb_5DL7UZJXEwk=:1684002131"
+      download_and_unzip clash-linux-amd64-v1.15.1.gz "http://runfu61ah.hn-bkt.clouddn.com/clash-linux-amd64-v1.15.1.gz
+"
       ;;
     i686)
-      download_and_unzip clash-linux-386-v1.15.1.gz "https://qinzhi.top/d/%E7%94%B5%E8%84%91/clash/clash-linux-386-v1.15.1.gz?sign=xLSNT3iKPa7L0Rj8WyZNkdvhuKKzW-Fjm1JU7TQCcPw=:1684002139"
+      download_and_unzip clash-linux-386-v1.15.1.gz "http://runfu61ah.hn-bkt.clouddn.com/clash-linux-386-v1.15.1.gz
+"
       ;;
     armv7l)
-      download_and_unzip clash-linux-armv7-v1.15.1.gz "https://qinzhi.top/d/%E7%94%B5%E8%84%91/clash/clash-linux-armv7-v1.15.1.gz?sign=snRbVIzskVq3w2hrPZv3aueWnFUKjYkDeNf9qF87XHg=:1684002101"
+      download_and_unzip clash-linux-armv7-v1.15.1.gz "http://runfu61ah.hn-bkt.clouddn.com/clash-linux-armv7-v1.15.1.gz"
       ;;
     aarch64)
-      download_and_unzip clash-linux-arm64-v1.15.1.gz "https://qinzhi.top/d/%E7%94%B5%E8%84%91/clash/clash-linux-arm64-v1.15.1.gz?sign=ZCKQtIIAQhHyTCSkiIosqOJu_cZ7nosGT6QUP7qme8A=:1684002120"
+      download_and_unzip clash-linux-arm64-v1.15.1.gz "http://runfu61ah.hn-bkt.clouddn.com/clash-linux-arm64-v1.15.1.gz
+"
       ;;
     *)
       echo "不支持的系统构架: $arch"
@@ -67,7 +70,7 @@ set_env_vars() {
 
 # 下载mmdb
 download_and_move_mmdb() {
-  wget https://github.com/Dreamacro/maxmind-geoip/releases/download/20230512/Country.mmdb
+  wget http://runfu61ah.hn-bkt.clouddn.com/Country.mmdb
   mv Country.mmdb ~/.config/clash/
 }
 
