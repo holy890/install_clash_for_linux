@@ -11,3 +11,4 @@ sudo wget -O - https://raw.githubusercontent.com/holy890/install_clash_for_linux
 sudo apt install whiptail
 ```  
 感谢你的使用！
+[![holy890/install_clash_for_linux's Github Stats](https://stats.deeptrain.net/repo/holy890/install_clash_for_linux)](https://github.com/zmh-program/code-statistic)
